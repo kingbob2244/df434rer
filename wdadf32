@@ -92,21 +92,21 @@ local Library = {
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
-    MainColor = Color3.fromRGB(28, 28, 28);
-    BackgroundColor = Color3.fromRGB(20, 20, 20);
+    MainColor = Color3.fromRGB(25, 25, 25); -- Slightly lighter
+    BackgroundColor = Color3.fromRGB(18, 18, 18); -- Slightly lighter
 
-    AccentColor = Color3.fromRGB(0, 85, 255);
-    DisabledAccentColor = Color3.fromRGB(142, 142, 142);
+    AccentColor = Color3.fromRGB(0, 120, 255); -- Softer blue
+    DisabledAccentColor = Color3.fromRGB(100, 100, 100);
 
-    OutlineColor = Color3.fromRGB(50, 50, 50);
-    DisabledOutlineColor = Color3.fromRGB(70, 70, 70);
+    OutlineColor = Color3.fromRGB(40, 40, 40); -- Softer outline
+    DisabledOutlineColor = Color3.fromRGB(60, 60, 60);
 
-    DisabledTextColor = Color3.fromRGB(142, 142, 142);
+    DisabledTextColor = Color3.fromRGB(120, 120, 120);
 
-    RiskColor = Color3.fromRGB(255, 50, 50);
+    RiskColor = Color3.fromRGB(255, 70, 70); -- Softer red
 
     Black = Color3.new(0, 0, 0);
-    Font = Enum.Font.Code,
+    Font = Enum.Font.SourceSans, -- Changed to SourceSans for cleaner look
 
     OpenedFrames = {};
     DependencyBoxes = {};
@@ -4819,9 +4819,9 @@ function Library:Notify(...)
     end);
 
     return Data
-end;
+end
 
--- MODIFIED: Changed layout to horizontal with tabs on left side
+-- MODIFIED: Horizontal layout with tabs on left, plus modern styling
 function Library:CreateWindow(...)
     local Arguments = { ... }
     local Config = { AnchorPoint = Vector2.zero }
@@ -4845,7 +4845,7 @@ function Library:CreateWindow(...)
             local ViewportSizeYOffset = tonumber(workspace.CurrentCamera.ViewportSize.Y) - 35;
             Config.Size = UDim2.fromOffset(550, math.clamp(ViewportSizeYOffset, 200, 600))
         else
-            Config.Size = UDim2.fromOffset(800, 500) -- Made wider for horizontal layout
+            Config.Size = UDim2.fromOffset(800, 500) -- Wider for horizontal layout
         end
     end
 
@@ -4863,6 +4863,7 @@ function Library:CreateWindow(...)
         OriginalTitle = Config.Title; Title = Config.Title;
     };
 
+    -- MODIFIED: Main window with rounded corners
     local Outer = Library:Create('Frame', {
         AnchorPoint = Config.AnchorPoint;
         BackgroundColor3 = Color3.new(0, 0, 0);
@@ -4873,6 +4874,12 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = ScreenGui;
     });
+    
+    -- Add corner radius
+    local OuterCorner = Instance.new("UICorner")
+    OuterCorner.CornerRadius = UDim.new(0, 8)
+    OuterCorner.Parent = Outer
+    
     LibraryMainOuterFrame = Outer;
     Library:MakeDraggable(Outer, 25, true);
 
@@ -4880,6 +4887,7 @@ function Library:CreateWindow(...)
         Library:MakeResizable(Outer, Library.MinSize);
     end
 
+    -- MODIFIED: Inner frame with rounded corners
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.AccentColor;
@@ -4889,31 +4897,61 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Outer;
     });
+    
+    local InnerCorner = Instance.new("UICorner")
+    InnerCorner.CornerRadius = UDim.new(0, 6)
+    InnerCorner.Parent = Inner
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'AccentColor';
     });
 
-    local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 7, 0, 0);
-        Size = UDim2.new(0, 0, 0, 25);
-        Text = Config.Title or '';
-        TextXAlignment = Enum.TextXAlignment.Left;
-        RichText = true; -- Added to support color fonts
-        ZIndex = 1;
+    -- MODIFIED: Title bar with gradient effect
+    local TitleBar = Library:Create('Frame', {
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 0, 0, 0);
+        Size = UDim2.new(1, 0, 0, 30);
+        ZIndex = 2;
         Parent = Inner;
     });
+    
+    local TitleGradient = Library:Create('UIGradient', {
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Library.BackgroundColor),
+            ColorSequenceKeypoint.new(1, Library:GetDarkerColor(Library.BackgroundColor)),
+        });
+        Rotation = 90;
+        Parent = TitleBar;
+    });
+    
+    local WindowLabel = Library:CreateLabel({
+        Position = UDim2.new(0, 12, 0, 0);
+        Size = UDim2.new(0, 0, 1, 0);
+        Text = Config.Title or '';
+        TextSize = 16;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        Font = Enum.Font.SourceSansBold,
+        RichText = true;
+        ZIndex = 3;
+        Parent = TitleBar;
+    });
 
-    -- MODIFIED: Main section with horizontal layout (tabs on left, content on right)
+    -- MODIFIED: Main content area with padding
     local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 8, 0, 25);
-        Size = UDim2.new(1, -16, 1, -33);
+        BorderMode = Enum.BorderMode.Inset;
+        Position = UDim2.new(0, 8, 0, 38);
+        Size = UDim2.new(1, -16, 1, -46);
         ZIndex = 1;
         Parent = Inner;
     });
+    
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 4)
+    MainCorner.Parent = MainSectionOuter
 
     Library:AddToRegistry(MainSectionOuter, {
         BackgroundColor3 = 'BackgroundColor';
@@ -4924,26 +4962,30 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Color3.new(0, 0, 0);
         BorderMode = Enum.BorderMode.Inset;
-        Position = UDim2.new(0, 0, 0, 0);
-        Size = UDim2.new(1, 0, 1, 0);
+        Position = UDim2.new(0, 1, 0, 1);
+        Size = UDim2.new(1, -2, 1, -2);
         ZIndex = 1;
         Parent = MainSectionOuter;
     });
+    
+    local MainInnerCorner = Instance.new("UICorner")
+    MainInnerCorner.CornerRadius = UDim.new(0, 2)
+    MainInnerCorner.Parent = MainSectionInner
 
     Library:AddToRegistry(MainSectionInner, {
         BackgroundColor3 = 'BackgroundColor';
     });
 
-    -- MODIFIED: Left side tabs area (vertical)
+    -- MODIFIED: Left side tabs area (vertical) with modern styling
     local LeftTabArea = Library:Create('ScrollingFrame', {
         ScrollingDirection = Enum.ScrollingDirection.Y;
         CanvasSize = UDim2.new(0, 0, 0, 0);
         AutomaticCanvasSize = Enum.AutomaticSize.Y;
-        ScrollBarThickness = 3;
+        ScrollBarThickness = 4;
         ScrollBarImageColor3 = Library.AccentColor;
         BackgroundTransparency = 1;
         Position = UDim2.new(0, 4, 0, 4);
-        Size = UDim2.new(0, 120, 1, -8);
+        Size = UDim2.new(0, 130, 1, -8);
         ZIndex = 1;
         Parent = MainSectionInner;
     });
@@ -4960,15 +5002,20 @@ function Library:CreateWindow(...)
         Parent = LeftTabArea;
     });
 
-    -- MODIFIED: Right side content area
+    -- MODIFIED: Right side content area with modern styling
     local TabContainer = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 130, 0, 4);
-        Size = UDim2.new(1, -138, 1, -8);
+        BorderMode = Enum.BorderMode.Inset;
+        Position = UDim2.new(0, 140, 0, 4);
+        Size = UDim2.new(1, -148, 1, -8);
         ZIndex = 2;
         Parent = MainSectionInner;
     });
+    
+    local TabContainerCorner = Instance.new("UICorner")
+    TabContainerCorner.CornerRadius = UDim.new(0, 4)
+    TabContainerCorner.Parent = TabContainer
     
     local InnerVideoBackground = Library:Create('VideoFrame', {
         BackgroundColor3 = Library.MainColor;
@@ -4996,7 +5043,7 @@ function Library:CreateWindow(...)
         end
     end;
 
-    -- MODIFIED: Updated AddTab for horizontal layout
+    -- MODIFIED: Updated AddTab for modern horizontal layout
     function Window:AddTab(Name)
         local Tab = {
             Groupboxes = {};
@@ -5004,16 +5051,20 @@ function Library:CreateWindow(...)
             OriginalName = Name; Name = Name;
         };
 
-        -- Create vertical tab button
-        local TabButtonHeight = Library:GetTextBounds(Tab.Name, Library.Font, 16) + 8;
+        -- Create vertical tab button with rounded corners
+        local TabButtonHeight = Library:GetTextBounds(Tab.Name, Library.Font, 16) + 10;
         
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(1, -4, 0, TabButtonHeight);
+            Size = UDim2.new(1, -8, 0, TabButtonHeight);
             ZIndex = 1;
             Parent = LeftTabArea;
         });
+        
+        local TabButtonCorner = Instance.new("UICorner")
+        TabButtonCorner.CornerRadius = UDim.new(0, 4)
+        TabButtonCorner.Parent = TabButton
 
         Library:AddToRegistry(TabButton, {
             BackgroundColor3 = 'BackgroundColor';
@@ -5021,14 +5072,28 @@ function Library:CreateWindow(...)
         });
 
         local TabButtonLabel = Library:CreateLabel({
-            Position = UDim2.new(0, 4, 0, 2);
-            Size = UDim2.new(1, -8, 1, -4);
+            Position = UDim2.new(0, 8, 0, 2);
+            Size = UDim2.new(1, -16, 1, -4);
             Text = Tab.Name;
             TextSize = 14;
             TextWrapped = true;
-            RichText = true; -- Added to support color fonts
-            ZIndex = 1;
+            Font = Enum.Font.SourceSans,
+            RichText = true;
+            ZIndex = 2;
             Parent = TabButton;
+        });
+
+        -- Active tab indicator (accent color line on left)
+        local ActiveIndicator = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 0, 0, 2);
+            Size = UDim2.new(0, 3, 1, -4);
+            ZIndex = 3;
+            Parent = TabButton;
+        });
+        Library:AddToRegistry(ActiveIndicator, {
+            BackgroundColor3 = 'AccentColor';
         });
 
         local Blocker = Library:Create('Frame', {
@@ -5136,7 +5201,8 @@ function Library:CreateWindow(...)
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
-            ScrollBarThickness = 0;
+            ScrollBarThickness = 4;
+            ScrollBarImageColor3 = Library.AccentColor;
             ZIndex = 2;
             Parent = TabFrame;
         });
@@ -5149,9 +5215,18 @@ function Library:CreateWindow(...)
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
-            ScrollBarThickness = 0;
+            ScrollBarThickness = 4;
+            ScrollBarImageColor3 = Library.AccentColor;
             ZIndex = 2;
             Parent = TabFrame;
+        });
+
+        Library:AddToRegistry(LeftSide, {
+            ScrollBarImageColor3 = 'AccentColor';
+        });
+        
+        Library:AddToRegistry(RightSide, {
+            ScrollBarImageColor3 = 'AccentColor';
         });
 
         Library:Create('UIListLayout', {
@@ -5279,6 +5354,7 @@ function Library:CreateWindow(...)
             Blocker.BackgroundTransparency = 0;
             TabButton.BackgroundColor3 = Library.MainColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'MainColor';
+            ActiveIndicator.BackgroundTransparency = 0;
             TabFrame.Visible = true;
 
             Tab:Resize();
@@ -5288,6 +5364,7 @@ function Library:CreateWindow(...)
             Blocker.BackgroundTransparency = 1;
             TabButton.BackgroundColor3 = Library.BackgroundColor;
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
+            ActiveIndicator.BackgroundTransparency = 1;
             TabFrame.Visible = false;
         end;
 
@@ -5303,12 +5380,13 @@ function Library:CreateWindow(...)
         function Tab:SetName(Name)
             if typeof(Name) == "string" then
                 Tab.Name = Name;
-                local TabButtonHeight = Library:GetTextBounds(Tab.Name, Library.Font, 16) + 8;
-                TabButton.Size = UDim2.new(1, -4, 0, TabButtonHeight);
+                local TabButtonHeight = Library:GetTextBounds(Tab.Name, Library.Font, 16) + 10;
+                TabButton.Size = UDim2.new(1, -8, 0, TabButtonHeight);
                 TabButtonLabel.Text = Tab.Name;
             end
         end;
 
+        -- MODIFIED: Groupbox with rounded corners
         function Tab:AddGroupbox(Info)
             local Groupbox = {};
 
@@ -5320,6 +5398,10 @@ function Library:CreateWindow(...)
                 ZIndex = 2;
                 Parent = Info.Side == 1 and LeftSide or RightSide;
             });
+            
+            local BoxOuterCorner = Instance.new("UICorner")
+            BoxOuterCorner.CornerRadius = UDim.new(0, 4)
+            BoxOuterCorner.Parent = BoxOuter
 
             Library:AddToRegistry(BoxOuter, {
                 BackgroundColor3 = 'BackgroundColor';
@@ -5334,6 +5416,10 @@ function Library:CreateWindow(...)
                 ZIndex = 4;
                 Parent = BoxOuter;
             });
+            
+            local BoxInnerCorner = Instance.new("UICorner")
+            BoxInnerCorner.CornerRadius = UDim.new(0, 2)
+            BoxInnerCorner.Parent = BoxInner
 
             Library:AddToRegistry(BoxInner, {
                 BackgroundColor3 = 'BackgroundColor';
@@ -5353,19 +5439,20 @@ function Library:CreateWindow(...)
 
             local GroupboxLabel = Library:CreateLabel({
                 Size = UDim2.new(1, 0, 0, 18);
-                Position = UDim2.new(0, 4, 0, 2);
+                Position = UDim2.new(0, 8, 0, 2);
                 TextSize = 14;
                 Text = Info.Name;
+                Font = Enum.Font.SourceSansBold,
                 TextXAlignment = Enum.TextXAlignment.Left;
-                RichText = true; -- Added to support color fonts
+                RichText = true;
                 ZIndex = 5;
                 Parent = BoxInner;
             });
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
-                Position = UDim2.new(0, 4, 0, 20);
-                Size = UDim2.new(1, -4, 1, -20);
+                Position = UDim2.new(0, 8, 0, 22);
+                Size = UDim2.new(1, -16, 1, -26);
                 ZIndex = 1;
                 Parent = BoxInner;
             });
@@ -5373,6 +5460,7 @@ function Library:CreateWindow(...)
             Library:Create('UIListLayout', {
                 FillDirection = Enum.FillDirection.Vertical;
                 SortOrder = Enum.SortOrder.LayoutOrder;
+                Padding = UDim.new(0, 4);
                 Parent = Container;
             });
 
@@ -5383,13 +5471,13 @@ function Library:CreateWindow(...)
                         Size = Size + Element.Size.Y.Offset;
                     end;
                 end;
-                BoxOuter.Size = UDim2.new(1, 0, 0, (20 * DPIScale + Size) + 2 + 2);
+                BoxOuter.Size = UDim2.new(1, 0, 0, (22 * DPIScale + Size) + 4 + 2);
             end;
 
             Groupbox.Container = Container;
             setmetatable(Groupbox, BaseGroupbox);
 
-            Groupbox:AddBlank(3);
+            Groupbox:AddBlank(2);
             Groupbox:Resize();
 
             Tab.Groupboxes[Info.Name] = Groupbox;
@@ -5418,6 +5506,10 @@ function Library:CreateWindow(...)
                 ZIndex = 2;
                 Parent = Info.Side == 1 and LeftSide or RightSide;
             });
+            
+            local BoxOuterCorner = Instance.new("UICorner")
+            BoxOuterCorner.CornerRadius = UDim.new(0, 4)
+            BoxOuterCorner.Parent = BoxOuter
 
             Library:AddToRegistry(BoxOuter, {
                 BackgroundColor3 = 'BackgroundColor';
@@ -5432,6 +5524,10 @@ function Library:CreateWindow(...)
                 ZIndex = 4;
                 Parent = BoxOuter;
             });
+            
+            local BoxInnerCorner = Instance.new("UICorner")
+            BoxInnerCorner.CornerRadius = UDim.new(0, 2)
+            BoxInnerCorner.Parent = BoxInner
 
             Library:AddToRegistry(BoxInner, {
                 BackgroundColor3 = 'BackgroundColor';
@@ -5452,7 +5548,7 @@ function Library:CreateWindow(...)
             local TabboxButtons = Library:Create('Frame', {
                 BackgroundTransparency = 1;
                 Position = UDim2.new(0, 0, 0, 1);
-                Size = UDim2.new(1, 0, 0, 18);
+                Size = UDim2.new(1, 0, 0, 22);
                 ZIndex = 5;
                 Parent = BoxInner;
             });
@@ -5461,7 +5557,13 @@ function Library:CreateWindow(...)
                 FillDirection = Enum.FillDirection.Horizontal;
                 HorizontalAlignment = Enum.HorizontalAlignment.Left;
                 SortOrder = Enum.SortOrder.LayoutOrder;
+                Padding = UDim.new(0, 4);
                 Parent = TabboxButtons;
+            });
+
+            Library:Create('UIPadding', {
+                PaddingLeft = UDim.new(0, 8),
+                Parent = TabboxButtons,
             });
 
             function Tabbox:AddTab(Name)
@@ -5470,10 +5572,14 @@ function Library:CreateWindow(...)
                 local Button = Library:Create('Frame', {
                     BackgroundColor3 = Library.MainColor;
                     BorderColor3 = Color3.new(0, 0, 0);
-                    Size = UDim2.new(0.5, 0, 1, 0);
+                    Size = UDim2.new(0.5, 0, 1, -2);
                     ZIndex = 6;
                     Parent = TabboxButtons;
                 });
+                
+                local ButtonCorner = Instance.new("UICorner")
+                ButtonCorner.CornerRadius = UDim.new(0, 4)
+                ButtonCorner.Parent = Button
 
                 Library:AddToRegistry(Button, {
                     BackgroundColor3 = 'MainColor';
@@ -5483,8 +5589,9 @@ function Library:CreateWindow(...)
                     Size = UDim2.new(1, 0, 1, 0);
                     TextSize = 14;
                     Text = Name;
+                    Font = Enum.Font.SourceSans,
                     TextXAlignment = Enum.TextXAlignment.Center;
-                    RichText = true; -- Added to support color fonts
+                    RichText = true;
                     ZIndex = 7;
                     Parent = Button;
                 });
@@ -5492,8 +5599,8 @@ function Library:CreateWindow(...)
                 local Block = Library:Create('Frame', {
                     BackgroundColor3 = Library.BackgroundColor;
                     BorderSizePixel = 0;
-                    Position = UDim2.new(0, 0, 1, 0);
-                    Size = UDim2.new(1, 0, 0, 1);
+                    Position = UDim2.new(0, 0, 1, -1);
+                    Size = UDim2.new(1, 0, 0, 2);
                     Visible = false;
                     ZIndex = 9;
                     Parent = Button;
@@ -5505,8 +5612,8 @@ function Library:CreateWindow(...)
 
                 local Container = Library:Create('Frame', {
                     BackgroundTransparency = 1;
-                    Position = UDim2.new(0, 4, 0, 20);
-                    Size = UDim2.new(1, -4, 1, -20);
+                    Position = UDim2.new(0, 8, 0, 28);
+                    Size = UDim2.new(1, -16, 1, -32);
                     ZIndex = 1;
                     Visible = false;
                     Parent = BoxInner;
@@ -5515,6 +5622,7 @@ function Library:CreateWindow(...)
                 Library:Create('UIListLayout', {
                     FillDirection = Enum.FillDirection.Vertical;
                     SortOrder = Enum.SortOrder.LayoutOrder;
+                    Padding = UDim.new(0, 4);
                     Parent = Container;
                 });
 
@@ -5544,8 +5652,8 @@ function Library:CreateWindow(...)
                     end;
 
                     for _, Button in next, TabboxButtons:GetChildren() do
-                        if not Button:IsA('UIListLayout') then
-                            Button.Size = UDim2.new(1 / TabCount, 0, 1, 0);
+                        if not Button:IsA('UIListLayout') and not Button:IsA('UIPadding') then
+                            Button.Size = UDim2.new(1 / TabCount, -4, 1, -2);
                         end;
                     end;
 
@@ -5559,7 +5667,7 @@ function Library:CreateWindow(...)
                             Size = Size + Element.Size.Y.Offset;
                         end;
                     end;
-                    BoxOuter.Size = UDim2.new(1, 0, 0, (20 * DPIScale + Size) + 2 + 2);
+                    BoxOuter.Size = UDim2.new(1, 0, 0, (28 * DPIScale + Size) + 4 + 2);
                 end;
 
                 Button.InputBegan:Connect(function(Input)
@@ -5574,10 +5682,10 @@ function Library:CreateWindow(...)
 
                 setmetatable(Tab, BaseGroupbox);
 
-                Tab:AddBlank(3);
+                Tab:AddBlank(2);
                 Tab:Resize();
 
-                if #TabboxButtons:GetChildren() == 2 then
+                if #TabboxButtons:GetChildren() - 2 == 1 then -- Subtract UIPadding and UIListLayout
                     Tab:Show();
                 end;
 
@@ -5737,6 +5845,7 @@ function Library:CreateWindow(...)
     end));
 
     if Library.IsMobile then
+        -- MODIFIED: Mobile toggle button with rounded corners
         local ToggleUIOuter = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
             Position = UDim2.new(0.008, 0, 0.018, 0);
@@ -5745,6 +5854,10 @@ function Library:CreateWindow(...)
             Visible = true;
             Parent = ScreenGui;
         });
+        
+        local ToggleUICorner = Instance.new("UICorner")
+        ToggleUICorner.CornerRadius = UDim.new(0, 6)
+        ToggleUICorner.Parent = ToggleUIOuter
     
         local ToggleUIInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
@@ -5754,6 +5867,10 @@ function Library:CreateWindow(...)
             ZIndex = 201;
             Parent = ToggleUIOuter;
         });
+        
+        local ToggleUIInnerCorner = Instance.new("UICorner")
+        ToggleUIInnerCorner.CornerRadius = UDim.new(0, 4)
+        ToggleUIInnerCorner.Parent = ToggleUIInner
     
         Library:AddToRegistry(ToggleUIInner, {
             BorderColor3 = 'AccentColor';
@@ -5767,6 +5884,10 @@ function Library:CreateWindow(...)
             ZIndex = 202;
             Parent = ToggleUIInner;
         });
+        
+        local ToggleUIInnerFrameCorner = Instance.new("UICorner")
+        ToggleUIInnerFrameCorner.CornerRadius = UDim.new(0, 2)
+        ToggleUIInnerFrameCorner.Parent = ToggleUIInnerFrame
     
         local ToggleUIGradient = Library:Create('UIGradient', {
             Color = ColorSequence.new({
@@ -5796,7 +5917,7 @@ function Library:CreateWindow(...)
             TextSize = 14;
             TextXAlignment = Enum.TextXAlignment.Left;
             TextStrokeTransparency = 0;
-            RichText = true; -- Added to support color fonts
+            RichText = true;
             ZIndex = 203;
             Parent = ToggleUIInnerFrame;
         });
@@ -5807,7 +5928,7 @@ function Library:CreateWindow(...)
             Library:Toggle()
         end)
 
-        -- Lock UI button
+        -- MODIFIED: Lock UI button with rounded corners
         local LockUIOuter = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
             Position = UDim2.new(0.008, 0, 0.075, 0);
@@ -5816,6 +5937,10 @@ function Library:CreateWindow(...)
             Visible = true;
             Parent = ScreenGui;
         });
+        
+        local LockUICorner = Instance.new("UICorner")
+        LockUICorner.CornerRadius = UDim.new(0, 6)
+        LockUICorner.Parent = LockUIOuter
     
         local LockUIInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
@@ -5825,6 +5950,10 @@ function Library:CreateWindow(...)
             ZIndex = 201;
             Parent = LockUIOuter;
         });
+        
+        local LockUIInnerCorner = Instance.new("UICorner")
+        LockUIInnerCorner.CornerRadius = UDim.new(0, 4)
+        LockUIInnerCorner.Parent = LockUIInner
     
         Library:AddToRegistry(LockUIInner, {
             BorderColor3 = 'AccentColor';
@@ -5838,6 +5967,10 @@ function Library:CreateWindow(...)
             ZIndex = 202;
             Parent = LockUIInner;
         });
+        
+        local LockUIInnerFrameCorner = Instance.new("UICorner")
+        LockUIInnerFrameCorner.CornerRadius = UDim.new(0, 2)
+        LockUIInnerFrameCorner.Parent = LockUIInnerFrame
     
         local LockUIGradient = Library:Create('UIGradient', {
             Color = ColorSequence.new({
@@ -5867,7 +6000,7 @@ function Library:CreateWindow(...)
             TextSize = 14;
             TextXAlignment = Enum.TextXAlignment.Left;
             TextStrokeTransparency = 0;
-            RichText = true; -- Added to support color fonts
+            RichText = true;
             ZIndex = 203;
             Parent = LockUIInnerFrame;
         });
